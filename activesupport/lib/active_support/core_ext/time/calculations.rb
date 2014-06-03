@@ -236,7 +236,12 @@ class Time
   def compare_with_coercion(other)
     # we're avoiding Time#to_datetime cause it's expensive
     if other.is_a?(Time)
-      compare_without_coercion(other.to_time)
+      # if two times are already in the same zone, avoid calling .to_time
+      if self.respond_to?(:zone) && other.respond_to?(:zone) && self.zone == other.zone
+        compare_without_coercion(other)
+      else
+        compare_without_coercion(other.to_time)
+      end
     else
       to_datetime <=> other
     end
